@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener in GO</title>
+  </head>
+  <body>
+    <form id="form">
+      <label for="url">Long URL</label>
+      <input type="text" id="url" />
+      <button type="submit">Submit</button>
+    </form>
+
+    <br />
+
+    <p>Long URL: <span id="longUrl">...</span></p>
+    <p>Short URL: <span id="shortUrl">...</span></p>
+
+    <script>
+      const form = document.getElementById("form");
+      const longUrlSpan = document.getElementById("longUrl");
+      const shortUrlSpan = document.getElementById("shortUrl");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const input = document.getElementById("url");
+        const longUrl = input.value;
+
+        try {
+          const response = await fetch("/api/shorten", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ long_url: longUrl }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            longUrlSpan.innerText = longUrl;
+            const url = window.location.origin + "/" + data.Short;
+
+            shortUrlSpan.innerText = url;
+            navigator.clipboard.writeText(url);
+            input.value = "";
+          } else {
+            shortUrlSpan.innerText = "Error creating link.";
+          }
+        } catch (error) {
+          console.error("Network error:", error);
+        }
+      });
+    </script>
+  </body>
+</html>
